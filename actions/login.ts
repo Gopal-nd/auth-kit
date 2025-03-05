@@ -3,6 +3,9 @@
 import * as z from 'zod'
 
 import { LoginSchema } from '@/Schema'
+import { signIn } from '@/auth'
+import { DEFAULT_LOGIN_REDIRECT } from '@/routes'
+import { AuthError } from 'next-auth'
 
 export const login = async(value:z.infer<typeof LoginSchema>) =>{
 console.log(value)
@@ -13,15 +16,26 @@ if(!validatedFields.success){
     return {error: "Invalid credentail"}
 }
 
+const {email, password} = validatedFields.data
+
 try {
-    const time = await wait(1)
-    return {status:'success',time,message:"form has sumbited"}
+    
+    await signIn("credentials",{
+        email,
+        password,
+        redirectTo:DEFAULT_LOGIN_REDIRECT
+    })
 } catch (error) {
-    console.log(error)
-    return {status:'error',error,message:"this is form catch side"}
+    if(error instanceof AuthError){
+        switch (error.type) {
+            case 'CredentialsSignin':
+                return {error: "invalid credetails provided"}
+            default:
+                return {error:"something went wrong"}
+        }
+    }
+    throw error
 }
-
-
 
 }
 

@@ -19,6 +19,7 @@ import { Button } from '../ui/button'
 import FormError from '../FormError'
 import FormSuccess from '../FormSucess'
 import { login } from '@/actions/login'
+import { Register } from '@/actions/register'
 
 const RegisterForm = () => {
     const [isPending, startTransition] = useTransition()
@@ -42,13 +43,13 @@ const RegisterForm = () => {
         setSuccess('')
             try {
                 
-                result = await login(value)
+                result = await Register(value)
                 
                 console.log(result)
-                if(result.status == 'success'){
-                    setSuccess(result.message)
+                if(result.success){
+                    setSuccess(result.success)
                 }else{
-                   setError(result.message) 
+                   setError(result.error) 
                 }
                 
             } catch (error) {

@@ -44,10 +44,11 @@ const LoginForm = () => {
                 result = await login(value)
                 
                 console.log(result)
-                if(result.status == 'success'){
-                    setSuccess(result.message)
+                
+                if(result?.success){
+                    setSuccess(result?.success)
                 }else{
-                   setError(result.message) 
+                   setError(result?.error) 
                 }
                 
             } catch (error) {

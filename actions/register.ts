@@ -2,9 +2,14 @@
 
 import * as z from 'zod'
 
-import { RegisterSchema } from '@/Schema'
+import bcrypt from 'bcryptjs'
 
-export const login = async(value:z.infer<typeof RegisterSchema>) =>{
+
+import { RegisterSchema } from '@/Schema'
+import { db } from '@/lib/db'
+import { getUserByEmail } from '@/data/user'
+
+export const Register = async(value:z.infer<typeof RegisterSchema>) =>{
 console.log(value)
 const validatedFields = RegisterSchema.safeParse(value)
 console.log(validatedFields)
@@ -13,15 +18,25 @@ if(!validatedFields.success){
     return {error: "Invalid credentail"}
 }
 
-try {
-    const time = await wait(1)
-    return {status:'success',time,message:"form has sumbited"}
-} catch (error) {
-    console.log(error)
-    return {status:'error',error,message:"this is form catch side"}
-}
+const {data:{email,name,password}} = validatedFields
+
+const ExistingUser =await getUserByEmail(email)
+
+const hashPassword = await bcrypt.hash(password,10)
 
 
+if(ExistingUser) return {error:'User already Exist'}
+
+await db.user.create({
+    data:{
+        name,
+        email,
+        password:hashPassword
+    }
+})
+
+// ToDo send verification user
+return {success:"User Created"}
 
 }
 
