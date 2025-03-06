@@ -42,3 +42,8 @@ it will generate the type suggetions in project
 
 ### > npx prisma db push
 it will push the colums to db
+
+### > npx prisma migrate reset
+it will erase all data (don't do this in production)
+after this command run `npx prisma db push`
+
