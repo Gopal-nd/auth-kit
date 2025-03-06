@@ -21,14 +21,31 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
   ...authConfig,
+  pages:{
+    signIn:'/auth/sign',
+    error:'/auth/error'
+  },
+  events:{
+    async linkAccount({user})  {
+      await db.user.update({
+        where:{id:user.id},
+        data:{emailVerified:new Date()}
+      })
+    }
+  },
   callbacks:{
 
-async signIn({user}){
-  // const existingUser = await getUserById(user.id!)
+async signIn({user,account}){
+  // allow OAuth without email verificaion
+  if(account?.provider!=='credentials') return true
 
-  // if(!existingUser || !existingUser.emailVerified){
-  //   return false
-  // }
+  const existingUser = await getUserById(user.id!)
+
+  if(!existingUser?.emailVerified) return false
+
+
+  // TODO : add 2FA check
+  console.log(user)
   return true
 },
 
@@ -40,7 +57,7 @@ async session({token,session}){
     if(token.role && session.user){
         session.user.role = token.role as UserRole
     }
-    console.log(session)
+    // console.log(session)
     return session
 },
 

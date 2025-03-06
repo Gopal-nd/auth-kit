@@ -8,6 +8,8 @@ import bcrypt from 'bcryptjs'
 import { RegisterSchema } from '@/Schema'
 import { db } from '@/lib/db'
 import { getUserByEmail } from '@/data/user'
+import { generateVerificationToken } from '@/lib/token'
+import { sendVerificationEmail } from '@/lib/mail'
 
 export const Register = async(value:z.infer<typeof RegisterSchema>) =>{
 console.log(value)
@@ -35,8 +37,14 @@ await db.user.create({
     }
 })
 
-// ToDo send verification user
-return {success:"User Created"}
+const userVerificationToken = await generateVerificationToken(email)
+
+await sendVerificationEmail(
+    userVerificationToken.email,
+    userVerificationToken.token
+)
+
+return {success:"Conformation Email sent"}
 
 }
 
