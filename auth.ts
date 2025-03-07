@@ -5,6 +5,7 @@ import authConfig from "@/auth.config"
 import { db } from "@/lib/db"
 import { getUserById } from "./data/user"
 import { UserRole } from "@prisma/client"
+import { getTowFactorConformationByUserId } from "./data/two-factor-confirmation"
 
 //not working
  
@@ -45,6 +46,14 @@ async signIn({user,account}){
 
 
   // TODO : add 2FA check
+  if(existingUser.isTwoFactorEnabled){
+    const twoFactorConformation = await getTowFactorConformationByUserId(existingUser.id)
+    if(!twoFactorConformation) return false
+
+    await db.twoFactorConfirmation.delete({
+      where:{id:twoFactorConformation.id}
+    })
+  }
   console.log(user)
   return true
 },
