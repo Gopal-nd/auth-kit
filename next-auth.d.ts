@@ -1,7 +1,7 @@
 import { DefaultSession } from "next-auth"
 
-export type ExtendedUser = DefaultSession['user'] & {role:"ADMIN"|"USER"}
-console.log(DefaultSession['user'])
+export type ExtendedUser = DefaultSession['user'] & {role:"ADMIN"|"USER"} & {isTwoFactorEnabled:Boolean}
+
 
 declare module 'next-auth' {
     interface Session {

@@ -4,7 +4,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import authConfig from "@/auth.config"
 import { db } from "@/lib/db"
 import { getUserById } from "./data/user"
-import { UserRole } from "@prisma/client"
+import { TwoFactorConfirmation, UserRole } from "@prisma/client"
 import { getTowFactorConformationByUserId } from "./data/two-factor-confirmation"
 
 //not working
@@ -66,6 +66,9 @@ async session({token,session}){
     if(token.role && session.user){
         session.user.role = token.role as UserRole
     }
+    if(token.isTwoFactorEnabled && session.user){
+      session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as Boolean
+  }
     // console.log(session)
     return session
 },
@@ -74,6 +77,7 @@ async jwt({token}){
     if(!token.sub)  return token
     const existingUser = await getUserById(token.sub)
     token.role = existingUser?.role
+    token.isTwoFactorEnabled = existingUser?.isTwoFactorEnabled
     // console.log(token)
     return token
 }
