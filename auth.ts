@@ -6,6 +6,7 @@ import { db } from "@/lib/db"
 import { getUserById } from "./data/user"
 import { TwoFactorConfirmation, UserRole } from "@prisma/client"
 import { getTowFactorConformationByUserId } from "./data/two-factor-confirmation"
+import { getAccountByUserId } from "@/data/account"
 
 //not working
  
@@ -69,6 +70,15 @@ async session({token,session}){
     if(token.isTwoFactorEnabled && session.user){
       session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as Boolean
   }
+  if(token.email&&session.user){
+    session.user.email = token.email
+  }
+  if(token.name&&session.user){
+    session.user.name = token.name
+  }
+  if(session.user){
+    session.user.isOAuth = token.isOAuth as Boolean
+  }
     // console.log(session)
     return session
 },
@@ -76,6 +86,11 @@ async session({token,session}){
 async jwt({token}){
     if(!token.sub)  return token
     const existingUser = await getUserById(token.sub)
+    if(!existingUser) return token
+  const existingAcount = await getAccountByUserId(existingUser?.id)
+    token.isOAuth = !!existingAcount
+    token.name = existingUser?.name
+    token.email = existingUser?.email
     token.role = existingUser?.role
     token.isTwoFactorEnabled = existingUser?.isTwoFactorEnabled
     // console.log(token)

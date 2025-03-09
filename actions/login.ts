@@ -13,6 +13,7 @@ import {generatTwoFactorToken,} from '@/lib/token'
 import { getTwoFactorTokenByEmail } from '@/data/two-factor-token'
 import { error } from 'console'
 import { getTowFactorConformationByUserId } from '@/data/two-factor-confirmation'
+import { revalidatePath } from 'next/cache'
 
 export const login = async(value:z.infer<typeof LoginSchema>) =>{
 console.log(value)
@@ -96,8 +97,10 @@ try {
     await signIn("credentials",{
         email,
         password,
-        redirectTo:DEFAULT_LOGIN_REDIRECT
+        redirectTo:'/settings'
     })
+    revalidatePath('/settings')
+    
 } catch (error) {
     if(error instanceof AuthError){
         switch (error.type) {
